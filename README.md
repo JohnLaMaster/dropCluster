@@ -1,5 +1,5 @@
 # dropCluster
-PyTorch implementation of dropCluster
+PyTorch implementation of dropCluster. Citations and references are listed and importable from each file.
 
 
 # Implementation Details
