@@ -24,6 +24,7 @@ The paper only uses dropCluster in the convolutional stem (after Conv(in_channel
                                      starting_epoch=opt.dropCluster_start,
                                      total_epochs=opt.dropCluster_warmup,
                                      total_batches=len(dataset),method='linear')
+
     for epoch in range(1, max_epoch):
         for i, data in enumerate(dataset):
             # dropCluster
@@ -34,6 +35,10 @@ The paper only uses dropCluster in the convolutional stem (after Conv(in_channel
                     model.set_input(data)
                     with torch.no_grad():
                         model.forward()
+
+            # Forward pass + optimization step
+            model.set_input(data)
+            model.optimize()
 ```
 
 JTL 10.22.2020
