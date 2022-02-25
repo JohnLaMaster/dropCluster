@@ -20,7 +20,7 @@ import math
 
 from types import SimpleNamespace
 
-__all__ = ['citation', 'scheduler', 'scheduler1']
+__all__ = ['citation', 'scheduler']
 
 citation = {'Source code': {'Author': 'Ing. John T LaMaster',
 							'Date': 'October 2020'}}
@@ -30,14 +30,11 @@ class scheduler():
         self.nBatch = total_batches - 1
         self.n_epochs = total_epochs
         self.init_epoch = starting_epoch
-        try:
-            case = (len(param) > 1)
-        except TypeError:
-            case = False
-        self.initial_value = param if case else [param]
+        if not isinstance(param, list): param = [param]
+        self.initial_value = param
         self.method = method
         self.total = self.n_epochs * self.nBatch
-        self.current_values = param
+        self.current_values = copy.copy(param)
 
         self.opt = SimpleNamespace(**kwargs)
 
@@ -110,42 +107,3 @@ class scheduler():
             return self.current_values
         else:
             return self.current_values
-
-
-class scheduler1():
-    def __init__(self, param, starting_epoch, total_epochs, total_batches, method='linear', **kwargs):
-        self.nBatch = total_batches - 1
-        self.n_epochs = total_epochs
-        self.init_epoch = starting_epoch
-        try:
-            case = (len(param) > 1)
-        except TypeError:
-            case = False
-        self.initial_value = param if case else [param]
-        self.method = method
-        self.total = self.n_epochs * self.nBatch
-        self.current_values = param
-
-
-    def __call__(self, epoch, batch):
-        if epoch>=self.n_epochs + self.init_epoch:
-            return self.current_values
-        elif epoch < self.init_epoch:
-            return [0 for _ in len(self.initial_value)]
-        else:
-            if self.method=='linear':
-                return self.linear(epoch, batch)
-
-    def cosine(self, epoch, batch):
-        epoch = epoch - self.init_epoch
-        current = (epoch % self.n_epochs) * self.nBatch + batch
-        delta = current / self.total
-        self.current_values = [0.5 * v * (1 + math.cos(math.pi * delta)) for v in self.initial_value]
-        return self.current_values
-
-    def linear(self, epoch, batch):
-        epoch = epoch - self.init_epoch
-        current = (epoch % self.n_epochs) * self.nBatch + batch
-        delta = current / self.total
-        self.current_values = [v * delta for v in self.initial_value]
-        return self.current_values
